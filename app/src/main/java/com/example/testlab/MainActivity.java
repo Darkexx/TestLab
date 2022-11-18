@@ -30,8 +30,8 @@ public class MainActivity extends AppCompatActivity {
         if(auth.getCurrentUser() != null){
             System.out.println("logged in");
 
-            //Intent intent = new Intent(this, MenuActivity.class);
-           // startActivity(intent);
+            Intent intent = new Intent(this, MenuActivity.class);
+            startActivity(intent);
         }
         else{
             setContentView(R.layout.activity_main);
