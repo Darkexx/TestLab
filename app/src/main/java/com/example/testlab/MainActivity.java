@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -30,8 +31,7 @@ public class MainActivity extends AppCompatActivity {
         if(auth.getCurrentUser() != null){
             System.out.println("logged in");
 
-            Intent intent = new Intent(this, MenuActivity.class);
-            startActivity(intent);
+            openClasesMenu();
         }
         else{
             setContentView(R.layout.activity_main);
@@ -46,6 +46,12 @@ public class MainActivity extends AppCompatActivity {
                 .replace (R.id.mainContainer, new AccountFragment())
                 .setTransition (FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                 .commit ();
+    }
+
+    public void openClasesMenu(){
+        Intent intent = new Intent(this, MenuActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     @Override

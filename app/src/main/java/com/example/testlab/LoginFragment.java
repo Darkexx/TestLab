@@ -56,8 +56,7 @@ public class LoginFragment extends Fragment {
                         if (user != null) {
                             name = user.getDisplayName ();
 
-                            //Intent intent = new Intent(getActivity(), MenuActivity.class);
-                            //startActivity(intent);
+                            ((MainActivity) getActivity()).openClasesMenu();
                         }
 
                         Toast.makeText (getActivity (), "Usuario " + name, Toast.LENGTH_LONG).show ();
