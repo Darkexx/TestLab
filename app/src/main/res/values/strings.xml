@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">TestLab</string>
+
+    <string name="or">o</string>
+    <string name="login">Iniciar sesion</string>
+    <string name="register">Registrarme</string>
+    <string name="user_text">Nombre de usuario</string>
+    <string name="pass_text">Contraseña</string>
+
+
+    <string name="my_clases">Mis clases</string>
+    <string name="create">Crear examen</string>
+</resources>
