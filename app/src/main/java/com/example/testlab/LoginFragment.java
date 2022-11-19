@@ -2,6 +2,7 @@ package com.example.testlab;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ public class LoginFragment extends Fragment {
     private FirebaseAuth auth;
 
 
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -38,7 +40,15 @@ public class LoginFragment extends Fragment {
 
         Button btnRegister = view.findViewById (R.id.login_btn);
         btnRegister.setOnClickListener (v -> {
-            login (edtEmail.getText().toString (), edtPassword.getText().toString ());
+            if (TextUtils.isEmpty(edtEmail.getText().toString())) {
+                Toast.makeText (getActivity (), "Proporciona un correo valido", Toast.LENGTH_LONG).show ();
+            }
+            else if(TextUtils.isEmpty(edtPassword.getText().toString())) {
+                Toast.makeText (getActivity (), "Ingresa una conntraseña", Toast.LENGTH_LONG).show ();
+            }
+            else {
+                login(edtEmail.getText().toString(), edtPassword.getText().toString());
+            }
         });
 
     }
