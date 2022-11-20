@@ -4,10 +4,17 @@
     <string name="or">o</string>
     <string name="login">Iniciar sesion</string>
     <string name="register">Registrarme</string>
+    <string name="email_text">Correo electronico</string>
     <string name="user_text">Nombre de usuario</string>
     <string name="pass_text">Contraseña</string>
 
 
     <string name="my_clases">Mis clases</string>
-    <string name="create">Crear examen</string>
+    <string name="create_test">Crear examen</string>
+    <string name="create_class">Crear clase</string>
+
+
+    <string name="class_img">Agregar imagen</string>
+    <string name="class_name">Nombre de la clase</string>
+    <string name="class_desc">Periodo</string>
 </resources>

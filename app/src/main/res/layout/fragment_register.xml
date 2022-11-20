@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:textAlignment="center"
-        android:text="@string/user_text" />
+        android:text="@string/email_text" />
 
 
     <EditText

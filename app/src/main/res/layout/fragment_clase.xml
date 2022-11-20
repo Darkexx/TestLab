@@ -19,7 +19,7 @@
         android:id="@+id/class_logo"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:background="@drawable/logo" />
+        android:src="@drawable/logo" />
 
         <LinearLayout
             android:orientation="vertical"
