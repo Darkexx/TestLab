@@ -73,11 +73,11 @@ public class MenuActivity extends Activity {
         Button btnNewClass = (Button)findViewById (R.id.class_new_btn);
         btnNewClass.setOnClickListener (v -> {
 
-            Intent intent = new Intent(this, NewClassActivity.class);
-            startActivity(intent);
+            //Intent intent = new Intent(this, NewClassActivity.class);
+            //startActivity(intent);
             //finish();
 
-            //CreatePopup();
+            CreatePopup();
 
 
             //public void createNewContactDialog(){
