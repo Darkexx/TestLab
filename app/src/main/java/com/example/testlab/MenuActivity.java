@@ -10,19 +10,31 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
@@ -38,6 +50,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Vector;
 
 public class MenuActivity extends Activity {
     private FirebaseAuth auth;
@@ -45,10 +58,10 @@ public class MenuActivity extends Activity {
     private static final String BASE_STORAGE_REFERENCE = "images";
     private static final String BASE_DATABASE_REFERENCE = "Clases";
 
-    private AlertDialog. Builder dialogBuilder;
+    private AlertDialog.Builder dialogBuilder;
     private AlertDialog dialog;
 
-    private RelativeLayout root;
+    private LinearLayout root;
     private Snackbar snackbar;
 
     private Button btnChangePic;
@@ -56,11 +69,22 @@ public class MenuActivity extends Activity {
     private TextView class_name;
     private TextView class_desc;
 
-    private FirebaseDatabase database;
     private FirebaseStorage storage;
     private DatabaseReference clases;
 
+    RecyclerView recyclerView;
+    FirebaseDatabase database;
+    ClassAdapter adapter;
+    Vector<Clase> vector;
 
+
+    @Override
+    protected void onResume() {
+        super.onResume ();
+
+        //login ();
+        getClases ();
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -70,6 +94,15 @@ public class MenuActivity extends Activity {
         database = FirebaseDatabase.getInstance ();
         storage = FirebaseStorage.getInstance ();
 
+        vector = new Vector<> ();
+        adapter = new ClassAdapter (vector);
+
+        recyclerView = findViewById (R.id.menuContainer);
+        recyclerView.addItemDecoration (new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        recyclerView.setItemAnimator (new DefaultItemAnimator());
+        recyclerView.setLayoutManager (new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
+        recyclerView.setAdapter (adapter);
+
         Button btnNewClass = (Button)findViewById (R.id.class_new_btn);
         btnNewClass.setOnClickListener (v -> {
 
@@ -78,11 +111,6 @@ public class MenuActivity extends Activity {
             //finish();
 
             CreatePopup();
-
-
-            //public void createNewContactDialog(){
-            //}
-            //Toast.makeText (this, "XD", Toast.LENGTH_LONG).show ();
         });
 
     }
@@ -93,8 +121,9 @@ public class MenuActivity extends Activity {
 
         btnChangePic = (Button) contactPopupView.findViewById (R.id.photo_btn);
         class_logo = (ImageView) contactPopupView.findViewById (R.id.class_logo);
-        class_name = (TextView) contactPopupView.findViewById(R.id.class_name);
-        class_desc = (TextView) contactPopupView.findViewById (R.id.class_desc);
+        class_name = (TextView) contactPopupView.findViewById(R.id.class_name_edtxt);
+        class_desc = (TextView) contactPopupView.findViewById (R.id.class_desc_edtxt);
+        root = (LinearLayout) contactPopupView.findViewById(R.id.popup_root);
 
         dialogBuilder.setView(contactPopupView);
         dialog = dialogBuilder.create();
@@ -107,13 +136,46 @@ public class MenuActivity extends Activity {
 
         Button btnSave = (Button) contactPopupView.findViewById (R.id.create_class_btn);
         btnSave.setOnClickListener (view -> {
-            //snackbar = Snackbar.make (root, "Guardando...", Snackbar.LENGTH_INDEFINITE);
-            //ViewGroup layer = (ViewGroup) snackbar.getView ().findViewById (com.google.android.material.R.id.snackbar_text).getParent ();
-            //ProgressBar bar = new ProgressBar (getBaseContext ());
-            //layer.addView (bar);
-            //snackbar.show ();
+            snackbar = Snackbar.make (root, "Guardando...", Snackbar.LENGTH_INDEFINITE);
+            ViewGroup layer = (ViewGroup) snackbar.getView ().findViewById (com.google.android.material.R.id.snackbar_text).getParent ();
+            ProgressBar bar = new ProgressBar (getBaseContext ());
+            layer.addView (bar);
+            snackbar.show ();
 
             saveInfo ();
+            dialog.dismiss();
+            adapter.notifyDataSetChanged();
+        });
+    }
+
+    private void getClases () {
+        Snackbar snackbar = Snackbar.make (recyclerView, "Obteniendo información...", Snackbar.LENGTH_INDEFINITE);
+        ViewGroup layer = (ViewGroup) snackbar.getView ().findViewById (com.google.android.material.R.id.snackbar_text).getParent ();
+        ProgressBar bar = new ProgressBar (getBaseContext ());
+        layer.addView (bar);
+        snackbar.show ();
+
+        DatabaseReference reference = database.getReference ("Clases");
+        //Vector<User> users = new Vector<>();
+
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange (@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot snap: snapshot.getChildren ()) {
+                    Clase u = snap.getValue (Clase.class);
+                    vector.add (u);
+                }
+
+                //recyclerView.setAdapter (new UsersAdapter (users));
+                adapter.notifyDataSetChanged ();
+                snackbar.dismiss ();
+            }
+
+            @Override
+            public void onCancelled (@NonNull DatabaseError error) {
+                Log.e ("TYAM", error.getDetails ());
+                snackbar.dismiss ();
+            }
         });
     }
 
@@ -241,5 +303,58 @@ public class MenuActivity extends Activity {
         }
 
         super.onActivityResult (requestCode, resultCode, data);
+    }
+}
+
+
+class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.UsersVH> {
+    private final Vector<Clase> clases;
+
+    public ClassAdapter (Vector<Clase> clases) {
+        this.clases = clases;
+    }
+
+    @NonNull
+    @Override
+    public ClassAdapter.UsersVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from (parent.getContext ()).inflate (R.layout.fragment_clase, parent, false);
+        return new UsersVH (view);
+    }
+
+    @Override
+    public void onBindViewHolder (@NonNull ClassAdapter.UsersVH holder, int position) {
+        Clase u = clases.get (position);
+
+        //holder.tvNameListItem.setText (String.format (Locale.getDefault (), "%s %s", u.nombre, u.apellidos));
+        //holder.tvAgeListItem.setText (String.valueOf (u.edad));
+        holder.nombre_clase.setText (u.nombre_clase);
+        holder.desc_clase.setText (u.desc_clase);
+
+        holder.setPicture (Uri.parse (u.foto));
+    }
+
+    @Override
+    public int getItemCount () {
+        return clases.size ();
+    }
+
+
+    class UsersVH extends RecyclerView.ViewHolder {
+        private final ImageView logo;
+        public TextView nombre_clase, desc_clase;
+
+        public UsersVH (@NonNull View itemView) {
+            super (itemView);
+
+            logo = itemView.findViewById (R.id.class_logo);
+            nombre_clase = itemView.findViewById (R.id.class_name);
+            desc_clase = itemView.findViewById (R.id.class_desc);
+        }
+
+        public void setPicture (Uri url) {
+            Picasso.get()
+                    .load (url)
+                    .into (logo);
+        }
     }
 }
