@@ -67,9 +67,19 @@ public class MenuActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
 
+        database = FirebaseDatabase.getInstance ();
+        storage = FirebaseStorage.getInstance ();
+
         Button btnNewClass = (Button)findViewById (R.id.class_new_btn);
         btnNewClass.setOnClickListener (v -> {
-            CreatePopup();
+
+            Intent intent = new Intent(this, NewClassActivity.class);
+            startActivity(intent);
+            //finish();
+
+            //CreatePopup();
+
+
             //public void createNewContactDialog(){
             //}
             //Toast.makeText (this, "XD", Toast.LENGTH_LONG).show ();
