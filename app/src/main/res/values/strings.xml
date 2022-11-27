@@ -8,13 +8,12 @@
     <string name="user_text">Nombre de usuario</string>
     <string name="pass_text">Contraseña</string>
 
-
     <string name="my_clases">Mis clases</string>
     <string name="create_test">Crear examen</string>
     <string name="create_class">Crear clase</string>
 
-
-    <string name="class_img">Agregar imagen</string>
+    <string name="class_img">Portada de clase</string>
+    <string name="add_class_img">Seleccionar</string>
     <string name="class_name">Nombre de clase</string>
     <string name="class_desc">Periodo</string>
 </resources>

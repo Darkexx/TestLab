@@ -22,9 +22,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
 
 import androidx.annotation.NonNull;
@@ -48,42 +54,26 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Vector;
 
 public class MenuActivity extends Activity {
     private FirebaseAuth auth;
-    private static final int SELECT_IMAGE_REQUEST_CODE = 2001;
-    private static final String BASE_STORAGE_REFERENCE = "images";
-    private static final String BASE_DATABASE_REFERENCE = "Clases";
 
-    private AlertDialog.Builder dialogBuilder;
-    private AlertDialog dialog;
-
-    private LinearLayout root;
-    private Snackbar snackbar;
-
-    private Button btnChangePic;
-    private ImageView class_logo;
-    private TextView class_name;
-    private TextView class_desc;
-
-    private FirebaseStorage storage;
-    private DatabaseReference clases;
-
-    RecyclerView recyclerView;
-    FirebaseDatabase database;
-    ClassAdapter adapter;
+    private static final String TAG = "EmailPassword";
+    ClasesAdapter adapter;
     Vector<Clase> vector;
+    RecyclerView recyclerView;
 
 
     @Override
     protected void onResume() {
-        super.onResume ();
+        super.onResume();
 
         //login ();
-        getClases ();
+        //getClases();
     }
 
     @Override
@@ -91,246 +81,83 @@ public class MenuActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
 
-        database = FirebaseDatabase.getInstance ();
-        storage = FirebaseStorage.getInstance ();
-
         vector = new Vector<> ();
-        adapter = new ClassAdapter (vector);
+        getClasesfromUser();
+        adapter = new ClasesAdapter (vector);
 
-        recyclerView = findViewById (R.id.menuContainer);
-        recyclerView.addItemDecoration (new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
-        recyclerView.setItemAnimator (new DefaultItemAnimator());
-        recyclerView.setLayoutManager (new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
-        recyclerView.setAdapter (adapter);
-
-        Button btnNewClass = (Button)findViewById (R.id.class_new_btn);
-        btnNewClass.setOnClickListener (v -> {
-
-            //Intent intent = new Intent(this, NewClassActivity.class);
-            //startActivity(intent);
+        Button btnNewClass = (Button) findViewById(R.id.class_new_btn);
+        btnNewClass.setOnClickListener(v -> {
+            Intent intent = new Intent(this, NewClassActivity.class);
+            startActivity(intent);
             //finish();
 
-            CreatePopup();
         });
 
     }
 
-    public  void  CreatePopup(){
-        dialogBuilder = new AlertDialog. Builder( this);
-        View contactPopupView = getLayoutInflater().inflate(R.layout.popup_new_class, null);
+    public void getClasesfromUser () {
+       //
+        System.out.println("xddd");
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-        btnChangePic = (Button) contactPopupView.findViewById (R.id.photo_btn);
-        class_logo = (ImageView) contactPopupView.findViewById (R.id.class_logo);
-        class_name = (TextView) contactPopupView.findViewById(R.id.class_name_edtxt);
-        class_desc = (TextView) contactPopupView.findViewById (R.id.class_desc_edtxt);
-        root = (LinearLayout) contactPopupView.findViewById(R.id.popup_root);
-
-        dialogBuilder.setView(contactPopupView);
-        dialog = dialogBuilder.create();
-        dialog.show();
-
-        btnChangePic.setOnClickListener (v -> {
-                selectImage();
-
-        });
-
-        Button btnSave = (Button) contactPopupView.findViewById (R.id.create_class_btn);
-        btnSave.setOnClickListener (view -> {
-            snackbar = Snackbar.make (root, "Guardando...", Snackbar.LENGTH_INDEFINITE);
-            ViewGroup layer = (ViewGroup) snackbar.getView ().findViewById (com.google.android.material.R.id.snackbar_text).getParent ();
-            ProgressBar bar = new ProgressBar (getBaseContext ());
-            layer.addView (bar);
-            snackbar.show ();
-
-            saveInfo ();
-            dialog.dismiss();
-            adapter.notifyDataSetChanged();
-        });
-    }
-
-    private void getClases () {
-        Snackbar snackbar = Snackbar.make (recyclerView, "Obteniendo información...", Snackbar.LENGTH_INDEFINITE);
-        ViewGroup layer = (ViewGroup) snackbar.getView ().findViewById (com.google.android.material.R.id.snackbar_text).getParent ();
-        ProgressBar bar = new ProgressBar (getBaseContext ());
-        layer.addView (bar);
-        snackbar.show ();
-
-        DatabaseReference reference = database.getReference ("Clases");
-        //Vector<User> users = new Vector<>();
-
-        reference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange (@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot snap: snapshot.getChildren ()) {
-                    Clase u = snap.getValue (Clase.class);
-                    vector.add (u);
-                }
-
-                //recyclerView.setAdapter (new UsersAdapter (users));
-                adapter.notifyDataSetChanged ();
-                snackbar.dismiss ();
-            }
-
-            @Override
-            public void onCancelled (@NonNull DatabaseError error) {
-                Log.e ("TYAM", error.getDetails ());
-                snackbar.dismiss ();
-            }
-        });
-    }
-
-
-    private void saveInfo () {
-        clases = database.getReference (BASE_DATABASE_REFERENCE);
-
-        Clase clase        = new Clase ();
-        clase.nombre_clase = class_name.getText().toString ();
-        clase.desc_clase   = class_desc.getText().toString ();
-
-        Bitmap bitmap = getBitmapFromDrawable (class_logo.getDrawable ());
-        ByteArrayOutputStream bos = new ByteArrayOutputStream ();
-        bitmap.compress (Bitmap.CompressFormat.JPEG, 100, bos);
-        byte [] data = bos.toByteArray ();
-
-        try {
-            bos.close();
-        } catch (IOException ex) {
-            if (ex.getMessage () != null) {
-                Log.e ("TYAM", ex.getMessage ());
-                return;
-            }
-
-            Log.e ("TYAM", "Error getting bytearray...", ex);
+        String email = null;
+        if (user != null) {
+            email = user.getEmail();
         }
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference docRef = db.collection("users").document(email);
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        getClasesData(document);
 
-        String fileReferece = String.format (Locale.US, "%s/%s_%s_%d.jpg",
-                BASE_STORAGE_REFERENCE, clase.nombre_clase, clase.desc_clase, System.currentTimeMillis ());
-
-        StorageReference images = storage.getReference (fileReferece);
-        images.putBytes (data)
-                .addOnCompleteListener (task -> {
-                    if (task.isComplete ()) {
-                        Task<Uri> dlUrlTask = images.getDownloadUrl ();
-
-                        dlUrlTask.addOnCompleteListener (task1 -> {
-                            Uri dlUrl = task1.getResult ();
-                            if (dlUrl == null) return;
-
-                            clase.foto = dlUrl.toString ();
-                            doSave (clase);
-                        });
+                    } else {
+                        Log.d(TAG, "No such document");
                     }
-                })
-                .addOnFailureListener (e -> {
-                    Log.e ("TYAM", e.getMessage ());
-                });
-    }
-
-    private void doSave (Clase clase) {
-        String nodeId = calculateStringHash (clase.toString ());
-        HashMap<String, Object> entry = new HashMap<> ();
-        entry.put (nodeId, clase);
-
-        clases.updateChildren (entry)
-                .addOnSuccessListener (aVoid -> {
-                    snackbar.dismiss ();
-                    Snackbar.make (root, "Información almacenada!", Snackbar.LENGTH_LONG).show ();
-                })
-                .addOnFailureListener (e -> Toast.makeText (getBaseContext (),
-                        "Error actualizando la BD: " + e.getMessage (),
-                        Toast.LENGTH_LONG).show ());
-    }
-
-
-    private void selectImage () {
-        Intent intent = new Intent (Intent.ACTION_PICK);
-        intent.setType ("image/*");
-
-        String [] mimeTypes = { "image/jpeg", "image/png" };
-        intent.putExtra (Intent.EXTRA_MIME_TYPES, mimeTypes);
-
-        startActivityForResult (intent, SELECT_IMAGE_REQUEST_CODE);
-    }
-
-    private String calculateStringHash (String input) {
-        try {
-            MessageDigest md5 = MessageDigest.getInstance ("MD5");
-            md5.update(input.getBytes());
-            byte[] digest = md5.digest();
-
-            StringBuilder sb = new StringBuilder(digest.length * 2);
-
-            for (byte b : digest) {
-                sb.append(Character.forDigit((b >> 8) & 0xf, 16));
-                sb.append(Character.forDigit(b & 0xf, 16));
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
             }
+        });
 
-            return sb.toString ();
-        } catch (NoSuchAlgorithmException ex) {
-            Log.e ("TYAM", ex.getMessage ());
-        }
-
-        return null;
     }
 
-    private Bitmap getBitmapFromDrawable (Drawable drble) {
-        // debido a la forma que el sistema dibuja una imagen en un el sistema gráfico
-        // es necearios realzar comprobaciones para saber del tipo de objeto Drawable
-        // con que se está trabajando.
-        //
-        // si el objeto recibido es del tipo BitmapDrawable no se requieren más conversiones
-        if (drble instanceof BitmapDrawable) {
-            return  ((BitmapDrawable) drble).getBitmap ();
+
+    public void getClasesData(DocumentSnapshot document){
+        ArrayList<String> clases = (ArrayList<String>) document.get("clases");
+        for(String clase: clases){
+            //System.out.println(clase);
+
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            DocumentReference docRef = db.collection(clase).document("data");
+            docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    Clase clase = documentSnapshot.toObject(Clase.class);
+                    System.out.println(clase.asList());
+                    vector.add (clase);
+                }
+            });
         }
-
-        // en caso contrario, se crea un nuevo objeto Bitmap a partir del contenido
-        // del objeto Drawable
-        Bitmap bitmap = Bitmap.createBitmap (drble.getIntrinsicWidth (), drble.getIntrinsicHeight (), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        drble.setBounds (0, 0, canvas.getWidth (), canvas.getHeight ());
-        drble.draw (canvas);
-
-        return bitmap;
     }
 
-    @Override
-    public void onActivityResult (int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == SELECT_IMAGE_REQUEST_CODE && resultCode == RESULT_OK) {
-            if (data == null) return;
-
-            Uri uri = data.getData ();
-            class_logo.setImageURI (uri);
-        }
-
-        super.onActivityResult (requestCode, resultCode, data);
-    }
 }
 
-
-class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.UsersVH> {
+class ClasesAdapter extends RecyclerView.Adapter<ClasesAdapter.ClasesVH> {
     private final Vector<Clase> clases;
 
-    public ClassAdapter (Vector<Clase> clases) {
+    public ClasesAdapter (Vector<Clase> clases) {
         this.clases = clases;
     }
 
     @NonNull
     @Override
-    public ClassAdapter.UsersVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ClasesAdapter.ClasesVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from (parent.getContext ()).inflate (R.layout.fragment_clase, parent, false);
-        return new UsersVH (view);
-    }
-
-    @Override
-    public void onBindViewHolder (@NonNull ClassAdapter.UsersVH holder, int position) {
-        Clase u = clases.get (position);
-
-        //holder.tvNameListItem.setText (String.format (Locale.getDefault (), "%s %s", u.nombre, u.apellidos));
-        //holder.tvAgeListItem.setText (String.valueOf (u.edad));
-        holder.nombre_clase.setText (u.nombre_clase);
-        holder.desc_clase.setText (u.desc_clase);
-
-        holder.setPicture (Uri.parse (u.foto));
+        return new ClasesVH (view);
     }
 
     @Override
@@ -339,22 +166,33 @@ class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.UsersVH> {
     }
 
 
-    class UsersVH extends RecyclerView.ViewHolder {
-        private final ImageView logo;
-        public TextView nombre_clase, desc_clase;
+    class ClasesVH extends RecyclerView.ViewHolder {
+        private final ImageView foto;
+        public TextView name, desc;
 
-        public UsersVH (@NonNull View itemView) {
+        public ClasesVH (@NonNull View itemView) {
             super (itemView);
 
-            logo = itemView.findViewById (R.id.class_logo);
-            nombre_clase = itemView.findViewById (R.id.class_name);
-            desc_clase = itemView.findViewById (R.id.class_desc);
+            foto = itemView.findViewById (R.id.class_logo);
+            name = itemView.findViewById (R.id.class_name_edtxt);
+            desc = itemView.findViewById (R.id.class_desc_edtxt);
         }
 
         public void setPicture (Uri url) {
             Picasso.get()
                     .load (url)
-                    .into (logo);
+                    .into (foto);
         }
+    }
+
+
+    @Override
+    public void onBindViewHolder (@NonNull ClasesAdapter.ClasesVH holder, int position) {
+        Clase u = clases.get (position);
+
+        holder.name.setText (String.valueOf (u.name));
+        holder.desc.setText (u.desc);
+
+        holder.setPicture (Uri.parse (u.foto));
     }
 }
