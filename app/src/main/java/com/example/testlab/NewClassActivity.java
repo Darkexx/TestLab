@@ -172,6 +172,7 @@ public class NewClassActivity extends Activity {
                         snackbar.dismiss ();
                         Snackbar.make (root, "Información almacenada!", Snackbar.LENGTH_LONG).show ();
                         finish();
+                        //getBaseContext().getClasesfromUser();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {

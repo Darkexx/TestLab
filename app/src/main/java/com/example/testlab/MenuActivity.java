@@ -60,9 +60,13 @@ import java.util.Locale;
 import java.util.Vector;
 
 public class MenuActivity extends Activity {
+
     private FirebaseAuth auth;
+    private Snackbar snackbar;
 
     private static final String TAG = "EmailPassword";
+    private LinearLayout root;
+
     ClasesAdapter adapter;
     Vector<Clase> vector;
     RecyclerView recyclerView;
@@ -73,7 +77,7 @@ public class MenuActivity extends Activity {
         super.onResume();
 
         //login ();
-        //getClases();
+        //getClasesfromUser();
     }
 
     @Override
@@ -81,16 +85,25 @@ public class MenuActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
 
+
         vector = new Vector<> ();
-        getClasesfromUser();
         adapter = new ClasesAdapter (vector);
+
+        root = findViewById (R.id.root);
+
+        recyclerView = findViewById (R.id.menuContainer);
+        recyclerView.addItemDecoration (new DividerItemDecoration (this, DividerItemDecoration.VERTICAL));
+        recyclerView.setItemAnimator (new DefaultItemAnimator ());
+        recyclerView.setLayoutManager (new LinearLayoutManager (this, RecyclerView.VERTICAL, false));
+        recyclerView.setAdapter (adapter);
+
+        getClasesfromUser();
 
         Button btnNewClass = (Button) findViewById(R.id.class_new_btn);
         btnNewClass.setOnClickListener(v -> {
             Intent intent = new Intent(this, NewClassActivity.class);
             startActivity(intent);
             //finish();
-
         });
 
     }
@@ -128,19 +141,27 @@ public class MenuActivity extends Activity {
 
     public void getClasesData(DocumentSnapshot document){
         ArrayList<String> clases = (ArrayList<String>) document.get("clases");
-        for(String clase: clases){
-            //System.out.println(clase);
 
-            FirebaseFirestore db = FirebaseFirestore.getInstance();
-            DocumentReference docRef = db.collection(clase).document("data");
-            docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                @Override
-                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    Clase clase = documentSnapshot.toObject(Clase.class);
-                    System.out.println(clase.asList());
-                    vector.add (clase);
-                }
-            });
+        if(clases != null){
+            for (String clase : clases) {
+                //System.out.println(clase);
+
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                DocumentReference docRef = db.collection(clase).document("data");
+                docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        Clase clase = documentSnapshot.toObject(Clase.class);
+                        System.out.println(clase.toString());
+                        vector.add(clase);
+
+                        adapter.notifyDataSetChanged();
+                    }
+                });
+            }
+        }
+        else{
+            Snackbar.make (root, "Aun no formas parte de alguna clase", Snackbar.LENGTH_LONG).show ();
         }
     }
 
@@ -167,32 +188,32 @@ class ClasesAdapter extends RecyclerView.Adapter<ClasesAdapter.ClasesVH> {
 
 
     class ClasesVH extends RecyclerView.ViewHolder {
-        private final ImageView foto;
+        private final ImageView logo;
         public TextView name, desc;
 
         public ClasesVH (@NonNull View itemView) {
             super (itemView);
 
-            foto = itemView.findViewById (R.id.class_logo);
-            name = itemView.findViewById (R.id.class_name_edtxt);
-            desc = itemView.findViewById (R.id.class_desc_edtxt);
+            logo = (ImageView) itemView.findViewById (R.id.class_logo);
+            name = (TextView) itemView.findViewById (R.id.class_name);
+            desc = (TextView) itemView.findViewById (R.id.class_desc);
         }
 
         public void setPicture (Uri url) {
             Picasso.get()
                     .load (url)
-                    .into (foto);
+                    .into (logo);
         }
     }
 
 
     @Override
     public void onBindViewHolder (@NonNull ClasesAdapter.ClasesVH holder, int position) {
-        Clase u = clases.get (position);
+        Clase clase = clases.get (position);
 
-        holder.name.setText (String.valueOf (u.name));
-        holder.desc.setText (u.desc);
+        holder.name.setText (String.valueOf (clase.name));
+        holder.desc.setText (String.valueOf (clase.desc));
 
-        holder.setPicture (Uri.parse (u.foto));
+        holder.setPicture (Uri.parse (clase.logo));
     }
 }

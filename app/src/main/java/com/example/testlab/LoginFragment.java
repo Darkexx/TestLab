@@ -44,7 +44,7 @@ public class LoginFragment extends Fragment {
                 Toast.makeText (getActivity (), "Proporciona un correo valido", Toast.LENGTH_LONG).show ();
             }
             else if(TextUtils.isEmpty(edtPassword.getText().toString())) {
-                Toast.makeText (getActivity (), "Ingresa una conntraseña", Toast.LENGTH_LONG).show ();
+                Toast.makeText (getActivity (), "Ingresa una contraseña", Toast.LENGTH_LONG).show ();
             }
             else {
                 login(edtEmail.getText().toString(), edtPassword.getText().toString());
