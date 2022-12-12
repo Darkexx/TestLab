@@ -1,4 +1,4 @@
-package com.example.testlab;
+package com.example.testlab.Fragments;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -13,13 +13,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.example.testlab.Activities.AccountActivity;
+import com.example.testlab.R;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -61,7 +57,7 @@ public class RegisterFragment extends Fragment {
                         saveNewUser(email, userName);
 
                         Toast.makeText (getContext (), "Register completed!", Toast.LENGTH_LONG).show ();
-                        ((MainActivity) getActivity()).openClasesMenu();
+                        ((AccountActivity) getActivity()).openClasesMenu();
 
                     } else {
                         if (task.getException () != null) {
@@ -77,27 +73,15 @@ public class RegisterFragment extends Fragment {
     private void saveNewUser (String userID, String userName) {
         Map<String, Object> user = new HashMap<>();
         user.put("name", userName);
+        user.put("id", userID);
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("users").document( userID)
                 .set(user)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText (getContext (), "datos registrados!", Toast.LENGTH_LONG).show ();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText (getContext (), "datos no registrados!", Toast.LENGTH_LONG).show ();
-                    }
-                });
+                .addOnSuccessListener(aVoid -> Toast.makeText (getContext (), "datos registrados!", Toast.LENGTH_LONG).show ())
+                .addOnFailureListener(e -> Toast.makeText (getContext (), "datos no registrados!", Toast.LENGTH_LONG).show ());
     }
 
 }
 
 
-class User {
-    public String name;
-}

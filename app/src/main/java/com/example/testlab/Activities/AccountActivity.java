@@ -1,25 +1,16 @@
-package com.example.testlab;
+package com.example.testlab.Activities;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 
+import com.example.testlab.Fragments.AccountFragment;
+import com.example.testlab.R;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
-public class MainActivity extends AppCompatActivity {
+public class AccountActivity extends AppCompatActivity {
     private FirebaseAuth auth;
 
     @Override
@@ -29,12 +20,10 @@ public class MainActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance ();
         if(auth.getCurrentUser() != null){
-            System.out.println("logged in");
-
             openClasesMenu();
         }
         else{
-            setContentView(R.layout.activity_main);
+            setContentView(R.layout.activity_account);
             doMenu();
         }
 
@@ -49,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void openClasesMenu(){
-        Intent intent = new Intent(this, MenuActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
     }

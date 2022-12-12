@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TestLab</string>
+    <string name="app_name">TesLab</string>
 
     <string name="or">o</string>
     <string name="login">Iniciar sesion</string>
@@ -12,8 +12,41 @@
     <string name="create_test">Crear examen</string>
     <string name="create_class">Crear clase</string>
 
-    <string name="class_img">Portada de clase</string>
-    <string name="add_class_img">Seleccionar</string>
-    <string name="class_name">Nombre de clase</string>
-    <string name="class_desc">Periodo</string>
+
+    <string name="new_test">Nuevo examen</string>
+    <string name="tests">Examenes</string>
+    <string name="add_test">Crear examen</string>
+
+    <string name="test_name">Título</string>
+    <string name="test_desc">Indicaciones</string>
+    <string name="add_question">Agregar pregunta</string>
+    <string name="tests_questions">Preguntas</string>
+    <string name="test_quest">Escribe una pregunta</string>
+    <string name="save_test">Guardar Examen</string>
+    <string name="duration">Duración</string>
+    <string name="minutes">minutos</string>
+    <string name="data_saved">Examen guardado</string>
+    <string name="saving">Guardando datos</string>
+    <string name="my_tests">Mis examenes</string>
+    <string name="not_tests">No tienes examenes creados</string>
+    <string name="test_name_sample">Examen Unidad 1</string>
+    <string name="test_desc_sample">Responde las siguientes preguntas.</string>
+    <string name="test_info">Informacion básica</string>
+    <string name="test_header">Encabezado</string>
+    <string name="test_institution">Institución</string>
+    <string name="test_institution_sample">Universidad Veracruzana</string>
+    <string name="test_teacher">Docente</string>
+    <string name="test_date">Fecha de aplicación</string>
+    <string name="empty_data">Los datos están vacios</string>
+    <string name="warning">Advertencia\nNo se guardaran los cambios</string>
+    <string name="want_to_leave">¿Estas seguro que quires salir?</string>
+    <string name="test_class">Clase</string>
+    <string name="test_class_sample">Algebra</string>
+    <string name="test_teacher_sample">Emanuel Lucho</string>
+    <string name="test_deleting">Se borrará este examen</string>
+    <string name="want_to_delete">¿Deseas continuar?</string>
+    <string name="indications">Indicaciones</string>
+    <string name="test_created">Documento creado</string>
+    <string name="test_student">Nombre del alumno</string>
+    <string name="loging_out">Se cerrará tu sesión</string>
 </resources>

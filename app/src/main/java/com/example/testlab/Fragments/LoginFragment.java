@@ -1,6 +1,5 @@
-package com.example.testlab;
+package com.example.testlab.Fragments;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -14,10 +13,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.testlab.Activities.AccountActivity;
+import com.example.testlab.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
-import com.example.testlab.MenuActivity;
 
 public class LoginFragment extends Fragment {
     private FirebaseAuth auth;
@@ -61,15 +60,13 @@ public class LoginFragment extends Fragment {
                         FirebaseUser user = auth.getCurrentUser ();
                         String name = "";
 
-                        System.out.println("logeado");
-
                         if (user != null) {
                             name = user.getDisplayName ();
 
-                            ((MainActivity) getActivity()).openClasesMenu();
+                            ((AccountActivity) getActivity()).openClasesMenu();
                         }
 
-                        Toast.makeText (getActivity (), "Usuario " + name, Toast.LENGTH_LONG).show ();
+                        Toast.makeText (getActivity (), "Bienvenido", Toast.LENGTH_LONG).show ();
                     } else {
                         Toast.makeText (getActivity (), "Usuario y/o contraseña no reconocida!", Toast.LENGTH_LONG).show ();
                     }
